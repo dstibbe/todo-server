@@ -1,5 +1,6 @@
 package com.example
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
@@ -17,9 +18,10 @@ private val todoItems = mutableMapOf<String, TodoItem>()
 
 @Serializable
 data class TodoRequest(
-    val text: String,
-    val done: Boolean = false
+    val text: String
 )
+
+private val logger = KotlinLogging.logger {}
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
@@ -33,91 +35,77 @@ fun Application.module() {
     }
 
     install(io.ktor.server.plugins.callloging.CallLogging)
-    
+
     install(io.ktor.server.plugins.statuspages.StatusPages) {
         exception<Throwable> { call, cause ->
-            call.application.environment.log.error("Unhandled exception", cause)
+            logger.error { "Unhandled exception: $cause" }
             call.respond(HttpStatusCode.InternalServerError, mapOf("error" to (cause.message ?: "Unknown error")))
         }
     }
 
     routing {
-        // POST /todo - add a new todo item
-        post("/todo") {
-            val request = call.receive<TodoRequest>()
-            val id = UUID.randomUUID().toString()
-            val todoItem = TodoItem(
-                id = id,
-                text = request.text,
-                done = request.done
-            )
-            todoItems[id] = todoItem
-            call.respond(HttpStatusCode.Created, todoItem)
-        }
-
-        // GET /todo - get all todo items
-        get("/todo") {
-            call.respond(ArrayList(todoItems.values))
-        }
-
-        // GET /todo/{id} - get specific todo item
-        get("/todo/{id}") {
-            val id = call.parameters["id"]
-            if (id == null) {
-                call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Missing id parameter"))
-                return@get
-            }
-            
-            val todoItem = todoItems[id]
-            if (todoItem == null) {
-                call.respond(HttpStatusCode.NotFound, mapOf("error" to "Todo item not found"))
-            } else {
-                call.respond(todoItem)
-            }
-        }
-
-        // DELETE /todo/{id} - delete specific todo item
-        delete("/todo/{id}") {
-            val id = call.parameters["id"]
-            if (id == null) {
-                call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Missing id parameter"))
-                return@delete
-            }
-            
-            val removed = todoItems.remove(id)
-            if (removed == null) {
-                call.respond(HttpStatusCode.NotFound, mapOf("error" to "Todo item not found"))
-            } else {
-                call.respond(HttpStatusCode.OK, mapOf("message" to "Todo item deleted"))
-            }
-        }
-
-        // POST /todo/{id}/state/{state} - update state of specific todo item
-        post("/todo/{id}/state/{state}") {
-            val id = call.parameters["id"]
-            val stateStr = call.parameters["state"]
-            
-            if (id == null || stateStr == null) {
-                call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Missing id or state parameter"))
-                return@post
-            }
-            
-            val state = when (stateStr.lowercase()) {
-                "true", "done" -> true
-                "false", "undone" -> false
-                else -> {
-                    call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid state. Use 'true' or 'false'"))
-                    return@post
+        route("/todo") {
+            post {
+                try {
+                    val request = call.receive<TodoRequest>()
+                    val id = UUID.randomUUID().toString()
+                    val todoItem = TodoItem(
+                        id = id,
+                        text = request.text,
+                        done = false,
+                    )
+                    todoItems[id] = todoItem
+                    call.respond(HttpStatusCode.Created, todoItem)
+                } catch (e: Exception) {
+                    logger.error { "Error creating todo item: $e" }
+                    call.respond(HttpStatusCode.InternalServerError, mapOf("error" to e.message))
                 }
             }
-            
-            val todoItem = todoItems[id]
-            if (todoItem == null) {
-                call.respond(HttpStatusCode.NotFound, mapOf("error" to "Todo item not found"))
-            } else {
-                val updatedItem = todoItem.copy(done = state)
-                todoItems[id] = updatedItem
-                call.respond(updatedItem)
+
+            get {
+                val todos = todoItems.values
+                logger.info { "Retrieved ${todos.size} todo items" }
+                call.respond(HttpStatusCode.OK, todos)
+            }
+        }
+
+        route("/todo/{id}") {
+            get {
+                val id = call.parameters["id"]!!
+
+                todoItems[id]?.let { todoItem ->
+                    call.respond(todoItem)
+                } ?: call.respond(HttpStatusCode.NotFound, mapOf("error" to "Todo item not found"))
+            }
+
+            delete {
+                val id = call.parameters["id"]!!
+
+                todoItems.remove(id)?.let {
+                    call.respond(HttpStatusCode.OK, mapOf("message" to "Todo item deleted"))
+                } ?: call.respond(HttpStatusCode.NotFound, mapOf("error" to "Todo item not found"))
+            }
+
+            route("/state/{state}") {
+                post {
+                    val id = call.parameters["id"]!!
+                    val stateStr = call.parameters["state"]?.toBooleanStrictOrNull()
+
+                    if (stateStr == null) {
+                        call.respond(
+                            HttpStatusCode.BadRequest,
+                            mapOf("error" to "Missing id or proper state parameter")
+                        )
+                        return@post
+                    }
+
+                    todoItems[id]?.apply {
+                        todoItems[id] = this.copy(done = stateStr)
+                        call.respond(HttpStatusCode.OK, mapOf("message" to "Todo item state updated"))
+                    } ?: run {
+                        call.respond(HttpStatusCode.NotFound, mapOf("error" to "Todo item not found"))
+                    }
+                }
             }
         }
     }
