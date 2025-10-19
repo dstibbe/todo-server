@@ -9,6 +9,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
+import io.ktor.server.plugins.calllogging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.*
 import kotlinx.serialization.Serializable
 import java.util.*
@@ -34,7 +35,7 @@ fun Application.module() {
         json()
     }
 
-    install(io.ktor.server.plugins.callloging.CallLogging)
+    install(CallLogging)
 
     install(io.ktor.server.plugins.statuspages.StatusPages) {
         exception<Throwable> { call, cause ->

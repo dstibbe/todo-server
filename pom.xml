@@ -10,18 +10,21 @@
     <packaging>pom</packaging>
 
     <properties>
-        <kotlin.version>1.9.10</kotlin.version>
-        <ktor.version>2.3.4</ktor.version>
+        <kotlin.compiler.jvmTarget>17</kotlin.compiler.jvmTarget>
+        <kotlin.version>2.1.21</kotlin.version>
+        <ktor.version>3.2.1</ktor.version>
         <logback.version>1.4.11</logback.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <kotlin.code.style>official</kotlin.code.style>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <kotlin-logging.version>7.0.13</kotlin-logging.version>
+        <mcp-sdk.version>0.7.2</mcp-sdk.version>
     </properties>
 
     <modules>
         <module>todo-server</module>
+        <module>mcp-server</module>
     </modules>
 
     <dependencyManagement>
@@ -59,10 +62,81 @@
                 <artifactId>ktor-server-call-logging-jvm</artifactId>
                 <version>${ktor.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>io.ktor</groupId>
+                <artifactId>ktor-server-cio-jvm</artifactId>
+                <version>${ktor.version}</version>
+            </dependency>
             <dependency>
                 <groupId>io.ktor</groupId>
                 <artifactId>ktor-server-status-pages-jvm</artifactId>
                 <version>${ktor.version}</version>
+            </dependency>
+            <!-- Ktor for HTTP client -->
+            <dependency>
+                <groupId>io.ktor</groupId>
+                <artifactId>ktor-client-core</artifactId>
+                <version>${ktor.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.ktor</groupId>
+                <artifactId>ktor-client-java-jvm</artifactId>
+                <version>${ktor.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.ktor</groupId>
+                <artifactId>ktor-client-cio-jvm</artifactId>
+                <version>${ktor.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.ktor</groupId>
+                <artifactId>ktor-serialization-jackson-jvm</artifactId>
+                <version>${ktor.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.ktor</groupId>
+                <artifactId>ktor-client-logging-jvm</artifactId>
+                <version>${ktor.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.ktor</groupId>
+                <artifactId>ktor-client-content-negotiation-jvm</artifactId>
+                <version>${ktor.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.ktor</groupId>
+                <artifactId>ktor-serialization-jackson</artifactId>
+                <version>${ktor.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.ktor</groupId>
+                <artifactId>ktor-client-auth-jvm</artifactId>
+                <version>${ktor.version}</version>
+            </dependency>
+            <!-- Ktor for HTTP server -->
+            <dependency>
+                <groupId>io.ktor</groupId>
+                <artifactId>ktor-server-cors-jvm</artifactId>
+                <version>${ktor.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>2.18.1</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.modelcontextprotocol</groupId>
+                <artifactId>kotlin-sdk-jvm</artifactId>
+                <version>${mcp-sdk.version}</version>
+            </dependency>
+
+
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>2.18.1</version>
             </dependency>
 
             <!-- Logging -->
@@ -96,7 +170,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <jvmTarget>11</jvmTarget>
+                    <jvmTarget>${kotlin.compiler.jvmTarget}</jvmTarget>
                     <compilerPlugins>
                         <plugin>kotlinx-serialization</plugin>
                     </compilerPlugins>
