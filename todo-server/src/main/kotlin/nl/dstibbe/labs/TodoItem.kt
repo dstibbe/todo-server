@@ -1,4 +1,4 @@
-package com.example
+package nl.dstibbe.labs
 
 import kotlinx.serialization.Serializable
 

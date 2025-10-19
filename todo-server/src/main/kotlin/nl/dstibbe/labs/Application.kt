@@ -1,4 +1,4 @@
-package com.example
+package nl.dstibbe.labs
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.server.application.*
