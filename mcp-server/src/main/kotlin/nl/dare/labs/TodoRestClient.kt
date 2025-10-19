@@ -65,7 +65,7 @@ class TodoRestClient(private val baseUrl: String = "http://127.0.0.1:8080") {
         return runBlocking {
             try {
                 logger.info("Finishing todo item: $id")
-                val response = client.post("$baseUrl/todo/$id/done/true") {
+                val response = client.post("$baseUrl/todo/$id/state/true") {
                     contentType(ContentType.Application.Json)
                 }
 

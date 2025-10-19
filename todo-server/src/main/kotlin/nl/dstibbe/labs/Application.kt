@@ -101,8 +101,9 @@ fun Application.module() {
                     }
 
                     todoItems[id]?.apply {
-                        todoItems[id] = this.copy(done = stateStr)
-                        call.respond(HttpStatusCode.OK, mapOf("message" to "Todo item state updated"))
+                        val newItem =  this.copy(done = stateStr)
+                        todoItems[id] = newItem
+                        call.respond(HttpStatusCode.OK, newItem)
                     } ?: run {
                         call.respond(HttpStatusCode.NotFound, mapOf("error" to "Todo item not found"))
                     }

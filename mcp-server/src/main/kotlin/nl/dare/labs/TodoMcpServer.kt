@@ -68,7 +68,7 @@ class TodoMcpServer(
             val todos = todoClient.listTodos()
             CallToolResult(
                 content = listOf(
-                    TextContent(todos.joinToString("\n") { it.text })
+                    TextContent(todos.joinToString("\n") { "{ id: ${it.id}, text:${it.text}, done: ${it.done} }" })
                 )
             )
         }
