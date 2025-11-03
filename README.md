@@ -1,4 +1,8 @@
+
+![Logo](https://github.com/dstibbe/todo-server/blob/bbf781535bafcadb07d769a5ee91a102029928a4/todo-mcp-logo.png?raw=true)
+
 # Todo-server with MCP
+
 A simple todo server for testing purposes. Includes two MCP servers
 
 ## Description
