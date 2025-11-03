@@ -1,33 +1,64 @@
-package nl.dare.labs
+/*
+ * Copyright (c) 2025 David Stibbe
+ */
 
-import io.ktor.server.plugins.contentnegotiation.*
-import io.ktor.server.application.install
-import io.ktor.server.cio.*
-import io.ktor.server.engine.*
+/*
+ * Copyright (c) 2025 David Stibbe
+ */
+
+package nl.dstibbe.labs.todomcp.mcpserverstdio
+
+import ch.qos.logback.classic.Level
+import ch.qos.logback.classic.LoggerContext
+import io.github.oshai.kotlinlogging.KotlinLogging
+import io.ktor.utils.io.streams.*
 import io.modelcontextprotocol.kotlin.sdk.*
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.server.ServerOptions
-import io.modelcontextprotocol.kotlin.sdk.server.mcp
+import io.modelcontextprotocol.kotlin.sdk.server.StdioServerTransport
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
+import kotlinx.io.asSink
+import kotlinx.io.buffered
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import nl.dstibbe.labs.todomcp.restclient.TodoRestClient
+import org.slf4j.Logger.ROOT_LOGGER_NAME
 import org.slf4j.LoggerFactory
-import io.ktor.serialization.jackson.*
+import kotlin.system.exitProcess
+
+fun main(args: Array<String>) = runBlocking {
+    // Set log level to INFO programmatically
+    with(LoggerFactory.getILoggerFactory() as LoggerContext) {
+        getLogger(ROOT_LOGGER_NAME).level = Level.OFF
+    }
+
+    try {
+        // Create and start the server
+        val server = McpStdioServer()
+        System.err.println("MCP StdIO Server started successfully")
+        server.start()
+    } catch (e: Exception) {
+        System.err.println("Failed to start MCP StdIO Server: ${e.message}")
+        exitProcess(1)
+    }
+}
 
 /**
- * MCP Server that exposes todo operations as tools
+ * MCP Server implementation that communicates via standard input/output.
+ * This class handles the communication between the DevCommands client and the MCP protocol.
  */
-class TodoMcpServer(
-    private val port: Int = 8081,
-    todoBaseUrl: String,
-) {
-    private val logger = LoggerFactory.getLogger(TodoMcpServer::class.java)
-    private val todoClient = TodoRestClient(todoBaseUrl)
+class McpStdioServer(val todoClient: TodoRestClient = TodoRestClient()) {
 
-    // Register available tools
-    fun configureMcp() = Server(
+    private val logger = KotlinLogging.logger {}
+    private val server = configureMcp()
+
+    /**
+     * Configure the MCP Server with capabilities and handlers
+     */
+    private fun configureMcp() = Server(
         Implementation(
-            name = "mcp-kotlin todo server",
+            name = "mcp-kotlin presentation controller stdio server",
             version = "1.0.0"
         ),
         ServerOptions(
@@ -39,6 +70,7 @@ class TodoMcpServer(
             )
         )
     ).apply {
+        // Add create task tool
         addTool(
             name = "add_todo",
             description = "Add a new todo item",
@@ -124,19 +156,24 @@ class TodoMcpServer(
         }
     }
 
-    /**
-     * Start the MCP Server
-     */
-    fun start() = runBlocking {
-        embeddedServer(CIO, host = "0.0.0.0", port = port) {
-            install(ContentNegotiation) {
-                jackson {}
-            }
-            mcp {
-                return@mcp configureMcp()
-            }
-        }.startSuspend(wait = true)
 
-        logger.info("MCP Server started on port $port")
+    /**
+     * Starts the MCP server and listens for input on stdin.
+     * Sends responses back through stdout.
+     */
+    suspend fun start() {
+        server.connect(
+            StdioServerTransport(
+                inputStream = System.`in`.asInput(),
+                outputStream = System.out.asSink().buffered()
+            )
+        )
+        val done = Job()
+        System.err.println("Server is CONNECTED!!!")
+        server.onClose {
+            done.complete()
+        }
+        done.join()
+        System.err.println("Server closed")
     }
 }

@@ -1,16 +1,25 @@
-package nl.dstibbe.labs
+/*
+ * Copyright (c) 2025 David Stibbe
+ */
+
+/*
+ * Copyright (c) 2025 David Stibbe
+ */
+
+package nl.dstibbe.labs.todomcp.todoserver
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
+import io.ktor.server.cio.*
 import io.ktor.server.engine.*
-import io.ktor.server.netty.*
+import io.ktor.server.plugins.calllogging.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
-import io.ktor.server.plugins.calllogging.CallLogging
-import io.ktor.server.plugins.contentnegotiation.*
 import kotlinx.serialization.Serializable
 import java.util.*
 
@@ -25,7 +34,7 @@ data class TodoRequest(
 private val logger = KotlinLogging.logger {}
 
 fun main() {
-    embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
+    embeddedServer(CIO, host = "0.0.0.0", port = 8080) {
         module()
     }.start(wait = true)
 }
@@ -37,7 +46,7 @@ fun Application.module() {
 
     install(CallLogging)
 
-    install(io.ktor.server.plugins.statuspages.StatusPages) {
+    install(StatusPages) {
         exception<Throwable> { call, cause ->
             logger.error { "Unhandled exception: $cause" }
             call.respond(HttpStatusCode.InternalServerError, mapOf("error" to (cause.message ?: "Unknown error")))
@@ -101,7 +110,7 @@ fun Application.module() {
                     }
 
                     todoItems[id]?.apply {
-                        val newItem =  this.copy(done = stateStr)
+                        val newItem = this.copy(done = stateStr)
                         todoItems[id] = newItem
                         call.respond(HttpStatusCode.OK, newItem)
                     } ?: run {

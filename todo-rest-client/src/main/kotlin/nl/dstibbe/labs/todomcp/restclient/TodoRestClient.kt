@@ -1,4 +1,12 @@
-package nl.dare.labs
+/*
+ * Copyright (c) 2025 David Stibbe
+ */
+
+/*
+ * Copyright (c) 2025 David Stibbe
+ */
+
+package nl.dstibbe.labs.todomcp.restclient
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.*
@@ -10,11 +18,10 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.jackson.*
 import kotlinx.coroutines.runBlocking
-import org.slf4j.LoggerFactory
 
 class TodoRestClient(private val baseUrl: String = "http://127.0.0.1:8080") {
 
-    private val logger = LoggerFactory.getLogger(TodoRestClient::class.java)
+    private val logger = KotlinLogging.logger {}
 
     private val client = HttpClient(CIO) {
         install(ContentNegotiation) {
@@ -34,7 +41,7 @@ class TodoRestClient(private val baseUrl: String = "http://127.0.0.1:8080") {
     fun addTodo(text: String): TodoItem {
         return runBlocking {
             try {
-                logger.info("Adding todo item: $text")
+                logger.info { "Adding todo item: $text" }
                 val response = client.post("$baseUrl/todo") {
                     contentType(ContentType.Application.Json)
                     setBody(mapOf("text" to text))
@@ -42,14 +49,14 @@ class TodoRestClient(private val baseUrl: String = "http://127.0.0.1:8080") {
 
                 if (response.status.isSuccess()) {
                     val todoItem = response.body<TodoItem>()
-                    logger.info("Added todo item: $todoItem")
+                    logger.info { "Added todo item: $todoItem" }
                     todoItem
                 } else {
-                    logger.error("Error from Todo Server: ${response.status}")
+                    logger.error { "Error from Todo Server: ${response.status}" }
                     throw RuntimeException("Failed to add todo item: ${response.status}")
                 }
             } catch (e: Exception) {
-                logger.error("Error adding todo item", e)
+                logger.error { "Error adding todo item, e: $e" }
                 throw RuntimeException("Failed to add todo item", e)
             }
         }
@@ -64,21 +71,21 @@ class TodoRestClient(private val baseUrl: String = "http://127.0.0.1:8080") {
     fun finishTodo(id: String): TodoItem {
         return runBlocking {
             try {
-                logger.info("Finishing todo item: $id")
+                logger.info { "Finishing todo item: $id" }
                 val response = client.post("$baseUrl/todo/$id/state/true") {
                     contentType(ContentType.Application.Json)
                 }
 
                 if (response.status.isSuccess()) {
                     val todoItem = response.body<TodoItem>()
-                    logger.info("Finished todo item: $todoItem")
+                    logger.info { "Finished todo item: $todoItem" }
                     todoItem
                 } else {
-                    logger.error("Error from Todo Server: ${response.status}")
+                    logger.error { "Error from Todo Server: ${response.status}" }
                     throw RuntimeException("Failed to finish todo item: ${response.status}")
                 }
             } catch (e: Exception) {
-                logger.error("Error finishing todo item", e)
+                logger.error { "Error finishing todo item. e: $e" }
                 throw RuntimeException("Failed to finish todo item", e)
             }
         }
@@ -91,19 +98,19 @@ class TodoRestClient(private val baseUrl: String = "http://127.0.0.1:8080") {
     fun listTodos(): List<TodoItem> {
         return runBlocking {
             try {
-                logger.info("Retrieving all todo items")
+                logger.info { "Retrieving all todo items" }
                 val response = client.get("$baseUrl/todo")
 
                 if (response.status.isSuccess()) {
                     val todoItems = response.body<List<TodoItem>>()
-                    logger.info("Retrieved ${todoItems.size} todo items")
+                    logger.info { "Retrieved ${todoItems.size} todo items" }
                     todoItems
                 } else {
-                    logger.error("Error from Todo Server: ${response.status}")
+                    logger.error { "Error from Todo Server: ${response.status}" }
                     throw RuntimeException("Failed to get todo items: ${response.status}")
                 }
             } catch (e: Exception) {
-                logger.error("Error getting todo items", e)
+                logger.error { "Error getting todo items. e: $e" }
                 throw RuntimeException("Failed to get todo items", e)
             }
         }
@@ -117,27 +124,27 @@ class TodoRestClient(private val baseUrl: String = "http://127.0.0.1:8080") {
     fun removeTodo(id: String): Boolean {
         return runBlocking {
             try {
-                logger.info("Deleting todo item with ID: $id")
+                logger.info { "Deleting todo item with ID: $id" }
                 val response = client.delete("$baseUrl/todo/$id")
 
                 when (response.status) {
                     HttpStatusCode.NoContent -> {
-                        logger.info("Deleted todo item with ID: $id")
+                        logger.info { "Deleted todo item with ID: $id" }
                         true
                     }
 
                     HttpStatusCode.NotFound -> {
-                        logger.info("Todo item with ID: $id not found")
+                        logger.info { "Todo item with ID: $id not found" }
                         false
                     }
 
                     else -> {
-                        logger.error("Error from Todo Server: ${response.status}")
+                        logger.error { "Error from Todo Server: ${response.status}" }
                         throw RuntimeException("Failed to delete todo item: ${response.status}")
                     }
                 }
             } catch (e: Exception) {
-                logger.error("Error deleting todo item", e)
+                logger.error { "Error deleting todo item. e: $e" }
                 throw RuntimeException("Failed to delete todo item", e)
             }
         }
