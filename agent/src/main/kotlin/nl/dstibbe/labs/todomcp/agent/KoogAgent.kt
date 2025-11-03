@@ -2,10 +2,6 @@
  * Copyright (c) 2025 David Stibbe
  */
 
-/*
- * Copyright (c) 2025 David Stibbe
- */
-
 package nl.dstibbe.labs.todomcp.agent
 
 import ai.koog.agents.core.agent.AIAgent
