@@ -10,7 +10,6 @@ package nl.dstibbe.labs.todomcp.mcpserverstdio
 
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.LoggerContext
-import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.utils.io.streams.*
 import io.modelcontextprotocol.kotlin.sdk.*
 import io.modelcontextprotocol.kotlin.sdk.server.Server
@@ -27,14 +26,12 @@ import org.slf4j.Logger.ROOT_LOGGER_NAME
 import org.slf4j.LoggerFactory
 import kotlin.system.exitProcess
 
-fun main(args: Array<String>) = runBlocking {
-    // Set log level to INFO programmatically
+fun main() = runBlocking {
     with(LoggerFactory.getILoggerFactory() as LoggerContext) {
         getLogger(ROOT_LOGGER_NAME).level = Level.OFF
     }
 
     try {
-        // Create and start the server
         val server = McpStdioServer()
         System.err.println("MCP StdIO Server started successfully")
         server.start()
@@ -45,16 +42,14 @@ fun main(args: Array<String>) = runBlocking {
 }
 
 /**
- * MCP Server implementation that communicates via standard input/output.
- * This class handles the communication between the DevCommands client and the MCP protocol.
+ * MCP Server implementation that communicates over standard input/output.
  */
 class McpStdioServer(val todoClient: TodoRestClient = TodoRestClient()) {
 
-    private val logger = KotlinLogging.logger {}
     private val server = configureMcp()
 
     /**
-     * Configure the MCP Server with capabilities and handlers
+     * Configure the MCP Server instance and register available tools.
      */
     private fun configureMcp() = Server(
         Implementation(
@@ -70,7 +65,7 @@ class McpStdioServer(val todoClient: TodoRestClient = TodoRestClient()) {
             )
         )
     ).apply {
-        // Add create task tool
+        // Tool: add_todo
         addTool(
             name = "add_todo",
             description = "Add a new todo item",
@@ -96,7 +91,7 @@ class McpStdioServer(val todoClient: TodoRestClient = TodoRestClient()) {
             name = "list_todos",
             description = "List all todo items",
             inputSchema = Tool.Input()
-        ) { request ->
+        ) { _request ->
             val todos = todoClient.listTodos()
             CallToolResult(
                 content = listOf(
@@ -134,6 +129,7 @@ class McpStdioServer(val todoClient: TodoRestClient = TodoRestClient()) {
                 )
             }
         }
+
         addTool(
             name = "finish_todo",
             description = "Mark todo item as completed",
@@ -156,10 +152,9 @@ class McpStdioServer(val todoClient: TodoRestClient = TodoRestClient()) {
         }
     }
 
-
     /**
-     * Starts the MCP server and listens for input on stdin.
-     * Sends responses back through stdout.
+     * Starts the MCP server and listens for input] on stdin. Responses are
+     * written to stdout.
      */
     suspend fun start() {
         server.connect(

@@ -36,7 +36,10 @@ fun main(args: Array<String>) {
 }
 
 /**
- * MCP Server that exposes todo operations as tools
+ * MCP Server that exposes todo operations as MCP tools over HTTP transport.
+ *
+ * The server runs an embedded Ktor
+ * engine and populates the MCP server instance via the `mcp` plugin.
  */
 class TodoMcpServer(
     private val port: Int = 8081,
@@ -85,7 +88,7 @@ class TodoMcpServer(
             name = "list_todos",
             description = "List all todo items",
             inputSchema = Tool.Input()
-        ) { request ->
+        ) { _request ->
             val todos = todoClient.listTodos()
             CallToolResult(
                 content = listOf(
