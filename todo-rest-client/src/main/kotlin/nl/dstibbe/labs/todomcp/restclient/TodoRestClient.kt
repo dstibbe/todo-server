@@ -5,7 +5,6 @@
 /*
  * Copyright (c) 2025 David Stibbe
  */
-
 package nl.dstibbe.labs.todomcp.restclient
 
 import io.github.oshai.kotlinlogging.KotlinLogging

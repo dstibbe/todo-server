@@ -3,7 +3,7 @@
 
 # Todo-server with MCP
 
-A simple todo server for testing purposes. Includes two MCP servers
+A simple todo server for testing purposes. Includes two MCP servers and an AI Agent that can use them.
 
 ## Description
 A REST API server built with Kotlin and Ktor for managing todo items (in memory).
@@ -20,8 +20,10 @@ mvn clean package
 ```
 
 ### Run
-Each server provides a main method to start it.
+Each server and the AI Agent provides a main method to start it.
 The REST server runs by default on port 8080. The HTTP MCP server runs by default on port 8081.
+The AI Agent connects, besides to the MCP server, to an Ollama LLM server by default running on port 11434 with model `llama3-groq-tool-use:8b`.
+Before running the agent make sure you have start the todo server, the HTTP/SSE MCP server, and the Ollama server.
 
 ### Testing
 

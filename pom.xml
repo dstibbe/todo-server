@@ -3,6 +3,10 @@
   ~ Copyright (c) 2025 David Stibbe
   -->
 
+<!--
+  ~ Copyright (c) 2025 David Stibbe
+  -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -24,6 +28,7 @@
         <maven.compiler.target>11</maven.compiler.target>
         <kotlin-logging.version>7.0.13</kotlin-logging.version>
         <mcp-sdk.version>0.7.2</mcp-sdk.version>
+        <koog-agents-jvm.version>0.4.1</koog-agents-jvm.version>
     </properties>
 
     <modules>
@@ -31,6 +36,7 @@
         <module>mcp-server-http-sse</module>
         <module>mcp-server-stdio</module>
         <module>todo-rest-client</module>
+        <module>agent</module>
     </modules>
 
     <dependencyManagement>
@@ -47,6 +53,13 @@
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-stdlib</artifactId>
                 <version>${kotlin.version}</version>
+            </dependency>
+
+            <!-- Koog -->
+            <dependency>
+                <groupId>ai.koog</groupId>
+                <artifactId>koog-agents-jvm</artifactId>
+                <version>${koog-agents-jvm.version}</version>
             </dependency>
 
             <!-- Ktor Server -->
@@ -81,6 +94,7 @@
                 <artifactId>ktor-server-status-pages-jvm</artifactId>
                 <version>${ktor.version}</version>
             </dependency>
+
             <!-- Ktor for HTTP client -->
             <dependency>
                 <groupId>io.ktor</groupId>
