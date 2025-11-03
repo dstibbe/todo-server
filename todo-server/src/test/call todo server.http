@@ -1,0 +1,21 @@
+### GET all todo items
+GET http://localhost:8080/todo
+
+
+### GET specific todo item
+GET http://localhost:8080/todo/5e6e6261-1666-4bdf-9d85-6fd6c2b7a65e
+
+### POST request to add a new todo item
+POST http://localhost:8080/todo
+Content-Type: application/json
+
+{
+ "text": "Learn how to use HTTP calls"
+}
+
+### DELETE todo by ID
+DELETE http://localhost:8080/todo/8fe0a497-97ba-4368-bf8d-58b50a4543e8
+
+
+### POST request to add a new todo item
+POST http://localhost:8080/todo/916628cf-e2d9-43aa-b2a7-802e5b8e7d84/state/true
