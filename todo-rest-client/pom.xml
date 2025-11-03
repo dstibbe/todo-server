@@ -3,6 +3,10 @@
   ~ Copyright (c) 2025 David Stibbe
   -->
 
+<!--
+  ~ Copyright (c) 2025 David Stibbe
+  -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -19,12 +23,6 @@
     <description>Rest Client for Todo Server</description>
 
     <dependencies>
-        <!-- Kotlin -->
-        <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-stdlib</artifactId>
-        </dependency>
-
         <!-- HTTP Client (for communicating with todo-server) -->
         <dependency>
             <groupId>io.ktor</groupId>
