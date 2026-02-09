@@ -104,6 +104,54 @@ To quickly install and run the MCP Inspector, use the following commands:
 npx @modelcontextprotocol/inspector
 ```
 
+### MCP Configuration
+
+#### Claude Desktop
+
+Add the following to your Claude Desktop configuration file (`claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "todo-server": {
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "-v",
+        "c:\\temp:/data",
+        "todo-server"
+      ]
+    }
+  }
+}
+```
+
+#### GitHub Copilot
+
+Add the following to your GitHub Copilot configuration (`.github-copilot/mcp-server.json` or settings):
+
+```json
+{
+  "mcpServers": {
+    "todo-server": {
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "-v",
+        "c:\\temp:/data",
+        "todo-server"
+      ]
+    }
+  }
+}
+```
+
+**Note:** The database will be persisted in `c:\temp\todos.db` on your Windows machine.
+
 ## Features
 
 - SQLite database for persistent storage
