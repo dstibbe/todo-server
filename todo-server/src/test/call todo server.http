@@ -19,3 +19,6 @@ DELETE http://localhost:8080/todo/3e10d9c1-e9d3-4c03-ac83-f85387072c7a
 
 ### POST request to add a new todo item
 POST http://localhost:8080/todo/3e10d9c1-e9d3-4c03-ac83-f85387072c7a/state/true
+
+### GET version
+GET http://localhost:8080/version

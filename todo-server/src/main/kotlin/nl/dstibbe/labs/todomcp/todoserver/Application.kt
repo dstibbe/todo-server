@@ -27,13 +27,28 @@ data class TodoRequest(
     val text: String
 )
 
+private fun loadVersion(): Pair<String, String> {
+    val props = Properties()
+    object {}.javaClass.getResourceAsStream("/version.properties")?.let { props.load(it) }
+
+    return with(props) {
+        (getProperty("version") ?: "unknown") to (getProperty("buildDate") ?: "unknown")
+    }
+}
+
 fun main() {
+    val version = loadVersion().let { (v, d) ->
+        "$v (build $d)"
+    }
+
+    logger.info { "Starting Todo Server - Version: $version" }
+    
     embeddedServer(CIO, host = "0.0.0.0", port = 8080) {
-        module()
+        module(version)
     }.start(wait = true)
 }
 
-fun Application.module() {
+fun Application.module(version:String) {
     install(ContentNegotiation) {
         json()
     }
@@ -48,6 +63,14 @@ fun Application.module() {
     }
 
     routing {
+        get("/version") {
+            call.respond(
+                mapOf(
+                    "version" to version,
+                )
+            )
+        }
+
         route("/todo") {
             post {
                 try {

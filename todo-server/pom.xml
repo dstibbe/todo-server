@@ -17,6 +17,11 @@
     <artifactId>todo-server</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <!-- Populate a version.properties at build time with project version and build timestamp -->
+    <properties>
+        <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ssZ</maven.build.timestamp.format>
+    </properties>
+
     <dependencies>
         <!-- Ktor Server -->
         <dependency>
@@ -64,6 +69,16 @@
 
 
     <build>
+        <!-- Enable resource filtering so version.properties is filled with Maven properties -->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.properties</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
