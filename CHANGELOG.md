@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0-SNAPSHOT] - In Development
 
 ### Added
+- Versioning mechanism for todo-server module
+  - version.properties file with Maven resource filtering
+  - loadVersion() function to read version from properties
+  - /version API endpoint to expose version information
+  - Version logging at server startup
 - SQLite database integration for persistent todo storage
   - TodoRepository.kt for database operations
   - Automatic database initialization
