@@ -18,6 +18,10 @@
     <name>Todo - MCP Server HTTP/SSE</name>
     <description>MCP Server over HTTP/SSE for Todo Server operations</description>
 
+    <properties>
+        <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ssZ</maven.build.timestamp.format>
+    </properties>
+
     <dependencies>
         <!-- Project -->
         <dependency>
@@ -70,6 +74,16 @@
     </dependencies>
 
     <build>
+        <!-- Enable resource filtering so version.properties is filled with Maven properties -->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.properties</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

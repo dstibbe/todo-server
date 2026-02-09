@@ -20,15 +20,31 @@ import kotlinx.serialization.json.JsonPrimitive
 import nl.dstibbe.labs.todomcp.restclient.TodoRestClient
 import org.slf4j.Logger.ROOT_LOGGER_NAME
 import org.slf4j.LoggerFactory
+import java.util.*
 import kotlin.system.exitProcess
+
+private fun loadVersion(): Pair<String, String> {
+    val props = Properties()
+    object {}.javaClass.getResourceAsStream("/version.properties")?.let { props.load(it) }
+
+    return with(props) {
+        (getProperty("version") ?: "unknown") to (getProperty("buildDate") ?: "unknown")
+    }
+}
 
 fun main() = runBlocking {
     with(LoggerFactory.getILoggerFactory() as LoggerContext) {
         getLogger(ROOT_LOGGER_NAME).level = Level.OFF
     }
 
+    val version = loadVersion().let { (v, d) ->
+        "$v (build $d)"
+    }
+
+    System.err.println("MCP StdIO Server - Version: $version")
+
     try {
-        val server = McpStdioServer()
+        val server = McpStdioServer(version)
         System.err.println("MCP StdIO Server started successfully")
         server.start()
     } catch (e: Exception) {
@@ -40,7 +56,10 @@ fun main() = runBlocking {
 /**
  * MCP Server implementation that communicates over standard input/output.
  */
-class McpStdioServer(val todoClient: TodoRestClient = TodoRestClient()) {
+class McpStdioServer(
+    private val version: String,
+    val todoClient: TodoRestClient = TodoRestClient()
+) {
 
     private val server = configureMcp()
 
@@ -50,7 +69,7 @@ class McpStdioServer(val todoClient: TodoRestClient = TodoRestClient()) {
     private fun configureMcp() = Server(
         Implementation(
             name = "mcp-kotlin presentation controller stdio server",
-            version = "1.0.0"
+            version = version
         ),
         ServerOptions(
             capabilities = ServerCapabilities(

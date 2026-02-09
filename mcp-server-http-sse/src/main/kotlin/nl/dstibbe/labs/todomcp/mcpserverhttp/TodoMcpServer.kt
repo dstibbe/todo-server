@@ -23,11 +23,28 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import nl.dstibbe.labs.todomcp.restclient.TodoRestClient
+import java.util.*
+
+private val logger = KotlinLogging.logger {}
+
+private fun loadVersion(): Pair<String, String> {
+    val props = Properties()
+    object {}.javaClass.getResourceAsStream("/version.properties")?.let { props.load(it) }
+
+    return with(props) {
+        (getProperty("version") ?: "unknown") to (getProperty("buildDate") ?: "unknown")
+    }
+}
 
 fun main(args: Array<String>) {
+    val version = loadVersion().let { (v, d) ->
+        "$v (build $d)"
+    }
+    logger.info { "MCP HTTP/SSE Server - Version: $version" }
+    
     val mcpPort = if (args.isNotEmpty()) args[0].toInt() else 8081
     val todoUrl = if (args.size > 1) args[1] else "http://127.0.0.1:8080"
-    val server = TodoMcpServer(mcpPort, todoUrl)
+    val server = TodoMcpServer(mcpPort, todoUrl, version)
     server.start()
 }
 
@@ -40,6 +57,7 @@ fun main(args: Array<String>) {
 class TodoMcpServer(
     private val port: Int = 8081,
     todoBaseUrl: String,
+    private val version: String,
 ) {
     private val logger = KotlinLogging.logger {}
     private val todoClient = TodoRestClient(todoBaseUrl)
@@ -48,7 +66,7 @@ class TodoMcpServer(
     fun configureMcp() = Server(
         Implementation(
             name = "mcp-kotlin todo server",
-            version = "1.0.0"
+            version = version
         ),
         ServerOptions(
             capabilities = ServerCapabilities(
