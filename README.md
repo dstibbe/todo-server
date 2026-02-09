@@ -79,5 +79,3 @@ npx @modelcontextprotocol/inspector
 - SQLite database for persistent storage
 - RESTful API for todo management
 - MCP protocol support via HTTP/SSE and stdio transports
-- Version tracking for all modules
-- Comprehensive logging
