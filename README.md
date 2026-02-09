@@ -6,7 +6,8 @@
 A simple todo server for testing purposes. Includes two MCP servers and an AI Agent that can use them.
 
 ## Description
-A REST API server built with Kotlin and Ktor for managing todo items (in memory).
+A REST API server built with Kotlin and Ktor for managing todo items.
+Todo items are persisted in a lightweight SQLite database (todos.db).
 Also provides two MCP servers for exposing the functionality to AI Agents via the MCP protocol.
 The two MCP agents are exposed over different media: one over HTTP and one over stdio.
 

@@ -19,15 +19,13 @@ import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
 import java.util.*
 
-// In-memory storage for todo items
-private val todoItems = mutableMapOf<String, TodoItem>()
+private val logger = KotlinLogging.logger {}
+private val todoRepository = TodoRepository()
 
 @Serializable
 data class TodoRequest(
     val text: String
 )
-
-private val logger = KotlinLogging.logger {}
 
 fun main() {
     embeddedServer(CIO, host = "0.0.0.0", port = 8080) {
@@ -60,7 +58,7 @@ fun Application.module() {
                         text = request.text,
                         done = false,
                     )
-                    todoItems[id] = todoItem
+                    todoRepository.create(todoItem)
                     call.respond(HttpStatusCode.Created, todoItem)
                 } catch (e: Exception) {
                     logger.error { "Error creating todo item: $e" }
@@ -69,7 +67,7 @@ fun Application.module() {
             }
 
             get {
-                val todos = todoItems.values
+                val todos = todoRepository.findAll()
                 logger.info { "Retrieved ${todos.size} todo items" }
                 call.respond(HttpStatusCode.OK, todos)
             }
@@ -79,7 +77,7 @@ fun Application.module() {
             get {
                 val id = call.parameters["id"]!!
 
-                todoItems[id]?.let { todoItem ->
+                todoRepository.findById(id)?.let { todoItem ->
                     call.respond(todoItem)
                 } ?: call.respond(HttpStatusCode.NotFound, mapOf("error" to "Todo item not found"))
             }
@@ -87,9 +85,11 @@ fun Application.module() {
             delete {
                 val id = call.parameters["id"]!!
 
-                todoItems.remove(id)?.let {
+                if (todoRepository.delete(id)) {
                     call.respond(HttpStatusCode.OK, mapOf("message" to "Todo item deleted"))
-                } ?: call.respond(HttpStatusCode.NotFound, mapOf("error" to "Todo item not found"))
+                } else {
+                    call.respond(HttpStatusCode.NotFound, mapOf("error" to "Todo item not found"))
+                }
             }
 
             route("/state/{state}") {
@@ -105,10 +105,13 @@ fun Application.module() {
                         return@post
                     }
 
-                    todoItems[id]?.apply {
-                        val newItem = this.copy(done = stateStr)
-                        todoItems[id] = newItem
-                        call.respond(HttpStatusCode.OK, newItem)
+                    todoRepository.findById(id)?.let { existingItem ->
+                        val updatedItem = existingItem.copy(done = stateStr)
+                        if (todoRepository.update(updatedItem)) {
+                            call.respond(HttpStatusCode.OK, updatedItem)
+                        } else {
+                            call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Failed to update todo"))
+                        }
                     } ?: run {
                         call.respond(HttpStatusCode.NotFound, mapOf("error" to "Todo item not found"))
                     }
