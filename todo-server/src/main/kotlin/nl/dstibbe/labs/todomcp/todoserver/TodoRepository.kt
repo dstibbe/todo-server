@@ -10,7 +10,7 @@ import java.sql.DriverManager
 
 private val logger = KotlinLogging.logger {}
 
-class TodoRepository(private val dbPath: String = "todos.db") {
+class TodoRepository(private val dbPath: String = System.getenv("DB_PATH") ?: "todos.db") {
     private val connection: Connection
 
     init {

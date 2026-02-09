@@ -20,6 +20,36 @@ The two MCP servers are exposed over different transports: one over HTTP/SSE and
 
 ## Building and Running
 
+### Docker (Recommended)
+
+The easiest way to run the todo-server and MCP stdio server is using Docker.
+
+First, build the project with Maven:
+```bash
+mvn clean package
+```
+
+Then build and run the Docker image:
+```bash
+# Build the Docker image
+docker build -f docker/Dockerfile -t todo-server .
+
+# Run the container
+docker run -i \
+  --rm \
+  -i \
+  -p 8080:8080 \
+  -v todo-data:/data \
+  todo-server
+```
+
+The Docker container includes:
+- Todo Server (REST API) on port 8080
+- MCP Server (stdio)
+- Persistent SQLite database in a Docker volume
+
+See [docker/README.md](docker/README.md) for more details.
+
 ### Build
 
 Build the project using Maven:
